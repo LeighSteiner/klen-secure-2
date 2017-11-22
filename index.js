@@ -1,9 +1,10 @@
 //should koa-compatibility be a configuration setting?  like default express unless you pass config koa
+const os = require('os')
 
 function klenSecure(){
   return (function(){ 
-    var secretLocation = {};
-	var secretId = 0;
+    const secretLocation = {};
+	let secretId = 0;
 	  return class {
 	    constructor(modelAuthenticator, authObject, logViewBool){
 
@@ -48,6 +49,7 @@ function klenSecure(){
 				    output.push(k);
 				  }	
 			   } 
+			    let 
 		        req.user.clearances = output.filter((elem,ind)=> output.indexOf(elem) === ind);
 			    console.log('clearances: ',req.user.clearances)
 			    next();
@@ -56,6 +58,11 @@ function klenSecure(){
 			    if (req.user.clearances.includes(whichAuth)){
 				  next();
 				}else{
+					let failObj = {
+					  user: req.user.id, 
+					  date: new Date(), 
+					  
+					}
 				  if (secretLocation[this.id].authFailLog[whichAuth]){
 				 	secretLocation[this.id].authFailLog[whichAuth].push(req.user.id);
 				 	console.log(whichAuth, 'fail log:',secretLocation[this.id].authFailLog[whichAuth]);
@@ -73,33 +80,7 @@ function klenSecure(){
 			}	
 		  }
 	    }
-			
-		singleRouteSecure(whichAuth){
-		  return async (req,res,next) => {
-		    if (req.user){
-			  if(secretLocation[this.id].authObject.hasOwnProperty(whichAuth)){
-			    let authTest = await secretLocation[this.id].authObject[whichAuth](req.user.id);
-				if(authTest){
-				  next();
-				}else{
-				  if (secretLocation[this.id].authFailLog[whichAuth]){
-				 	secretLocation[this.id].authFailLog[whichAuth].push(req.user.id);
-				 	console.log(whichAuth, 'Fail Log: ',secretLocation[this.id].authFailLog[whichAuth]);
-				 	next(new Error('single route: you do not have clearance'));
-				  }else{
-				    secretLocation[this.id].authFailLog[whichAuth] = [req.user.id];
-				    console.log(whichAuth, "Fail Log: ",secretLocation[this.id].authFailLog[whichAuth])
-				 	next(new Error('single route: you do not have clearance'));
-				  }
-				}
-			  }else{
-			    next(new Error('singleRouteSecure: not a valid authorization check'))
-			  }
-		    }else{
-			  next(new Error('singleRouteSecure: user is not logged in'));
-		    }
-		  }
-		}
+
         //ditch this
 	    signOutMiddleware(){
 	      return (req,res,next) => {
@@ -107,7 +88,7 @@ function klenSecure(){
 			next();
 		   }
 		}
-		//add date time IP address, user info?  
+		//add date time IP address, user info?  //add a ClearAuthFailLog?  and a SendLog?  
 		getAuthFailLog(){
 		  return (req, res, next) => {
 		    if(secretLocation[this.id].logViewBool){
