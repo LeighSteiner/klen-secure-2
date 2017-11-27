@@ -1,5 +1,4 @@
 //should koa-compatibility be a configuration setting?  like default express unless you pass config koa
-const os = require('os')
 
 function klenSecure(){
   return (function(){ 
@@ -10,8 +9,7 @@ function klenSecure(){
 
 		  this.id = secretId++
 		  secretLocation[this.id] = {
-		    //logViewBool : logViewBool || false, //default setting is that you canNOT modify the log 
-			//viewAuthFailLog : this.viewAuthFailLog, 
+		    logViewBool : logViewBool || false, //default setting is that you canNOT modify the log  
 			getAuthFailLog : this.getAuthFailLog
 		   };
 
@@ -63,7 +61,7 @@ function klenSecure(){
                       ipAddress: req.ip,
 					}
 				  if (secretLocation[this.id].authFailLog[whichAuth]){
-				 	secretLocation[this.id].authFailLog[whichAuth].push(failObj);
+				 	secretLocation[this.id].authFailLog[whichAuth].push(failObj );
 				 	console.log(whichAuth, 'fail log:',secretLocation[this.id].authFailLog[whichAuth]);
 				  }else{
 				 	secretLocation[this.id].authFailLog[whichAuth] = [req.user.id];
