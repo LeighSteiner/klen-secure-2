@@ -6,12 +6,12 @@ function klenSecure(){
     const secretLocation = {};
 	let secretId = 0;
 	  return class {
-	    constructor(modelAuthenticator, authObject, logViewBool){
+	    constructor(modelAuthenticator, authObject,logViewBool, config){
 
 		  this.id = secretId++
 		  secretLocation[this.id] = {
-		    logViewBool : logViewBool || false, //default setting is that you canNOT modify the log 
-			viewAuthFailLog : this.viewAuthFailLog, 
+		    //logViewBool : logViewBool || false, //default setting is that you canNOT modify the log 
+			//viewAuthFailLog : this.viewAuthFailLog, 
 			getAuthFailLog : this.getAuthFailLog
 		   };
 
@@ -49,7 +49,6 @@ function klenSecure(){
 				    output.push(k);
 				  }	
 			   } 
-			    let 
 		        req.user.clearances = output.filter((elem,ind)=> output.indexOf(elem) === ind);
 			    console.log('clearances: ',req.user.clearances)
 			    next();
@@ -61,10 +60,10 @@ function klenSecure(){
 					let failObj = {
 					  user: req.user.id, 
 					  date: new Date(), 
-					  
+                      ipAddress: req.ip,
 					}
 				  if (secretLocation[this.id].authFailLog[whichAuth]){
-				 	secretLocation[this.id].authFailLog[whichAuth].push(req.user.id);
+				 	secretLocation[this.id].authFailLog[whichAuth].push(failObj);
 				 	console.log(whichAuth, 'fail log:',secretLocation[this.id].authFailLog[whichAuth]);
 				  }else{
 				 	secretLocation[this.id].authFailLog[whichAuth] = [req.user.id];
@@ -81,13 +80,6 @@ function klenSecure(){
 		  }
 	    }
 
-        //ditch this
-	    signOutMiddleware(){
-	      return (req,res,next) => {
-			req.user.clearances = null;
-			next();
-		   }
-		}
 		//add date time IP address, user info?  //add a ClearAuthFailLog?  and a SendLog?  
 		getAuthFailLog(){
 		  return (req, res, next) => {
@@ -99,15 +91,6 @@ function klenSecure(){
 			}
 		  }
 		}
-//does this matter? get rid of logViewBool?
-		viewAuthFailLog(){
-		  return (req,res,next) => {
-		    req.user.authFailLog = JSON.stringify(secretLocation[this.id].authFailLog);
-			next();
-		  }
-		}
-	  }
-	}
 	)();
 }
 module.exports = klenSecure;
