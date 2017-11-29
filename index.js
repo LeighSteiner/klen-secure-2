@@ -78,8 +78,8 @@ function klenSecure(){
           	  	throw new Error('user is not logged in')
           	  }
           	} catch(e){
-          	 // console.log(e)
-          	 next(e);
+          	 res.status(403).send(e.message)
+          	 
           	}
           }
 	    }
