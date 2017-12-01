@@ -78,7 +78,7 @@ function klenSecure(){
           	  	throw new Error('user is not logged in')
           	  }
           	} catch(e){
-          	 res.status(403).send(e.message)
+          	 res.status(403).send(e.message);
           	 
           	}
           }
@@ -86,12 +86,38 @@ function klenSecure(){
 			
 		getAuthFailLog(){
 		  return (req, res, next) => {
-		    if(secretLocation[this.id].logViewBool){
-			  req.user.authFailLog = secretLocation[this.id].authFailLog;
-			  next();  
-			}else{
-			  next(new Error('you cannot modify this log'));
-			}
+		    try{
+		      if(secretLocation[this.id].logViewBool){
+			    req.user.authFailLog = secretLocation[this.id].authFailLog;
+			    next();  
+			  }else{
+			    throw new Error('you cannot view this log');
+			  }
+		    }catch(e){
+		      res.status(403).send(e.message);
+		    }
+
+		  }
+		}
+
+		clearAuthFailLog(){
+		  return (req, res, next) => {
+		  	try{
+              if(secretLocation[this.id].logViewBool){
+			    secretLocation[this.id].authFailLog = 
+			    {lastCleared: {
+ 				    date: new Date(), 
+ 				    user: req.user.id
+			      }
+			    }
+			    next();
+			  }else{
+			    throw new Error('you cannot clear this log');
+			  }
+		  	}catch(e){
+		      res.status(403).send(e.message);
+		  	}
+
 		  }
 		}
 
