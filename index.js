@@ -1,3 +1,4 @@
+
 function klenSecure(){
 	return (function(){
 		var secretLocation = {};
@@ -39,7 +40,6 @@ function klenSecure(){
 			}
 
 		authFailLogger(whichAuth){
-
          if(secretLocation[this.id].config === 'express'){
           return async (req, res, next) => {
           	try{
@@ -102,7 +102,7 @@ function klenSecure(){
               	}
               	if (secretLocation[this.id].authObject.hasOwnProperty(whichAuth)){
                   if(ctx.state.user.clearances.includes(whichAuth)){
-                  	next();
+                  	await next();
                   }else{
                   	let ip = ctx.ips.length > 0 ? ctx.ips[ctx.ips.length - 1] : ctx.ip
                   	let failObj = {
@@ -117,15 +117,16 @@ function klenSecure(){
                   	   secretLocation[this.id].authFailLog[whichAuth]= [failObj];
                   	   console.log(whichAuth, ' fail log: ', secretLocation[this.id].authFailLog[whichAuth])                  		
                   	}
-                  	throw new Error('You do not have valid clearance to view '+ whichAuth)
+                  	return
                   }
               	}else{
-              	  throw new Error('not a valid authorization check' + whichAuth)
+              		return
               	}
               }else{
-              	throw new Error ('user is not logged in')
+              	return; 
               }
            	}catch(e){
+           	  console.log(e);
            	  ctx.body = e
            	}
            }
@@ -138,9 +139,9 @@ function klenSecure(){
 		    try{
 		      if(secretLocation[this.id].logViewBool){
 			    req.user.authFailLog = secretLocation[this.id].authFailLog;
-			    next();  
+			     next();  
 			  }else{
-			    throw new Error('you cannot view this log');
+			    return
 			  }
 		    }catch(e){
 		      res.status(403).send(e.message);
@@ -152,9 +153,9 @@ function klenSecure(){
 		  	try{
 		      if(secretLocation[this.id].logViewBool){
 		      	ctx.state.user.authFailLog = secretLocation[this.id].authFailLog;
-		      	next();
+		      	await next();
 		      }else{
-		      	throw new Error('you cannot view this log');
+		      	return
 		      }              
 		  	}catch(e){
 		  	  ctx.body = e
@@ -174,7 +175,7 @@ function klenSecure(){
  				    user: req.user.id
 			      }
 			    }
-			    next();
+			     next();
 			  }else{
 			    throw new Error('you cannot clear this log');
 			  }
@@ -184,7 +185,7 @@ function klenSecure(){
 
 		  }
 		 }else{
-		  return(req, res, next) => {
+		  return async (ctx, next) => {
 		  	try{
               if(secretLocation[this.id].logViewBool){
 			    secretLocation[this.id].authFailLog = 
@@ -194,7 +195,7 @@ function klenSecure(){
  				    user: ctx.state.user.id
 			      }
 			    }
-			    next();    
+			     await next();    
 			    }else{
 			    	throw new Error('you cannot clear this log');
 			    }         
