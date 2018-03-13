@@ -197,7 +197,7 @@ function klenSecure(){
 			    }
 			     await next();    
 			    }else{
-			    	throw new Error('you cannot clear this log');
+			    	return
 			    }         
 		  	}catch(e){
 		      ctx.body = e
